@@ -1,9 +1,18 @@
 (async () => {
-  // d3.json loads the file, this returns a promise and so we have to await for it
-  const data = (await d3.json("data/testData.json")).california;
+  const states = (await d3.csv("data/states.csv")).map((d) => {
+    const name = d.State;
+    delete d["State"];
+    return {
+      name,
+      values: Object.entries(d).map(([a, b]) => {
+        return { year: +a, count: +b };
+      }),
+    };
+  });
 
-  // We can see that data is an array of objects of the form: { year, students }
-  console.log(data);
+  const cali = states.find(({ name }) => name === "California");
+  console.log(cali);
+  // console.log(states.columns.slice(1, 15));
 
   // select the html div
   const container = d3.select("#timeseries");
@@ -30,7 +39,7 @@
     ___________________________________   _
     |  __________margin.top_________  |    |
     | |                             | |    |
-    | margin.left        margin.right |    size.height  
+    | margin.left        margin.right |    size.height
     | |_________margin.bottom_______| |    |
     |_________________________________|   _|
 
@@ -49,14 +58,14 @@
   // range is the pixel range of our plot. The scaleLinear creates a linear mapping between the domain and range
   const x = d3
     .scaleLinear()
-    .domain(d3.extent(data, (d) => d.year))
+    .domain(d3.extent(cali.values, (d) => d.year))
     .range([padding.left, size.width - padding.right]);
 
   // here we want the low values of range to be at the bottom of the plot so we start at the height - the bottom padding
   // we use d3.max here so that we can make sure the scale starts at 0
   const y = d3
     .scaleLinear()
-    .domain([0, d3.max(data, (d) => d.students)])
+    .domain([0, d3.max(cali.values, (d) => d.count)])
     .range([size.height - padding.bottom, padding.top]);
 
   // this calculates the path of our line
@@ -65,10 +74,10 @@
   const line = d3
     .line()
     .x((d) => x(d.year))
-    .y((d) => y(d.students));
+    .y((d) => y(d.count));
 
   svg
-    .datum(data)
+    .datum(cali.values)
     .append("path")
     .attr("fill", "none") // see what happens when we comment this line out!
     .attr("stroke", "black")
@@ -79,9 +88,17 @@
   // look at the bottom of the script here: https://www.d3-graph-gallery.com/graph/area_basic.html,
   // after the comment: // Add the area
   // and make an area to fill in, something like:
-  /*    
+  /*
         const area = d3.area()....
     */
   // then write code similar to lines 70-75/what's on the website to add the area
   // extending from y(0) to the line we have
+
+  const area = d3
+    .area()
+    .x((d) => x(d.year))
+    .y0(y(0))
+    .y1((d) => y(d.count));
+
+  svg.datum(cali.values).append("path").attr("fill", "blue").attr("d", area);
 })();
