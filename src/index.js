@@ -14,16 +14,18 @@
 
   // this div contains the selection
   // add margin with .style() (works similar to .attr()) to give it some space from the plot
-
+  container.style("margin", "35px");
   // when you are using .style() look up how to do it in CSS
   // for example https://www.w3schools.com/cssref/pr_margin.asp
   const inputArea = container.append("div");
-
   // this is a label tag for the selection input
   // add a .text() and enter a string to make the label
+  inputArea.text("Dropdown Menu");
   // add right margin with .style() to give some space between the text and the dropdown
+
   // change the font family to Helvetica Neue,Helvetica,Arial,sans-serif
-  inputArea.append("label").attr("for", "stateSelection");
+  inputArea.style("font-family", "Helvetica Neue,Helvetica,Arial,sans-serif");
+  inputArea.append("label").attr("for", "stateSelection").style("margin-right","30px");
 
   const stateInput = inputArea.append("select").attr("name", "stateSelection");
 
@@ -40,11 +42,9 @@
   };
   // we want something like this:
   /*
-
  this is our SVG:
  - x values increase left to right
  - y values increase top to bottom
-
  | - - - - - size.width  - - - - - |
  ___________________________________   _
  |  __________margin.top_________  |    |
@@ -52,7 +52,6 @@
  | margin.left        margin.right |    size.height
  | |_________margin.bottom_______| |    |
  |_________________________________|   _|
-
 */
 
   // put an svg inside of the div with our height and width
@@ -80,6 +79,7 @@
       .scaleLinear()
       .domain([0, d3.max(state.values, (d) => d.count)])
       .range([size.height - margin.bottom, margin.top]);
+ 
 
     // this calculates the path of our line
     // it always starts with d3.line() and then we have to specify the x and y pixel values
@@ -95,10 +95,10 @@
       .join("path")
       .attr("class", "timeseriesPlot")
       .attr("fill", "none") // see what happens when we comment this line out!
-      .attr("stroke", "black")
-      // .transition()      // uncomment these out to see a smooth transition when we change the state
-      // .duration(1000)
-      .attr("d", line);
+      .attr("stroke", "green")
+      .transition()      // uncomment these out to see a smooth transition when we change the state
+      .duration(1000)
+      .attr("d",line);
 
     // TODO:
     //
@@ -111,12 +111,29 @@
     // then write code similar to lines 77-86/what's on the website to add the area
     // extending from y(0) to the line we have
 
-    svg.selectAll(".timeseriesArea").data([state.values]).join("path");
+    
     // add area here
+    const area = d3.area()
+      .x((d) => x(d.year))
+      .y1((d) => y(d.count))
+      .y0(y(0));
+
+    svg
+      .selectAll(".timeseriesArea")
+      .data([state.values])
+      .join("path")
+      .attr("class", "timeseriesArea")
+      .attr("fill", "#cce5df")
+      .attr("stroke", "#69b3a2")
+      .attr("stroke-width", 1.5)
+      .attr("d", area);
+      
+    //unfinished?
+
     // change the attribute fill color
     // set the fill-opacity attribute to something between 0-1
+    //area.attr("fill-opacity", "0.5");
     //
-
     svg
       .append("g")
       .attr("transform", `translate(0, ${size.height - margin.bottom})`)
@@ -125,21 +142,31 @@
       .attr("color", "#adadad")
       .call(d3.axisBottom(x).tickFormat((d) => d));
   };
-
+/*
   makePlot("California");
 
   setTimeout(() => {
-    makePlot("Arizona");
+    makePlot("Colorado");
   }, 2000);
-
+*/
+makePlot("Alabama");
   // TODO
 
   // append `option` tags
   // add the `value` attribute with the value being the state's name
   // add the .text() of the state's name to get the values to display in the drop down
   // https://stackoverflow.com/a/43122306
+var options = stateInput.selectAll("option")
+  .data(states)
+  .enter()
+  .append("option");
 
-  stateInput.selectAll("option").data(states).enter();
+options.text(function(d) {
+    return d.name;
+  })
+  .attr("value", function(d) {
+    return d.name;
+  });
 
   // add an event listener (.on()) for "input".
   // this way, everytime you select something from the dropdown, this function is called
@@ -147,6 +174,11 @@
   // the state's name is at event.target.value
   // then call the makePlot function with this value
   // see: https://gramener.github.io/d3js-playbook/events.html
+
+  stateInput.on("input", function(){
+    var tarVal = event.target.value;
+    makePlot(tarVal);
+  });
 })();
 
 // Other things to look at:
