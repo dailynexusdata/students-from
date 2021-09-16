@@ -30,6 +30,9 @@ import makeCountriesStatic from '../print/countriesStatic';
     ).properties;
     prop.val = d.val;
   });
+  states.features = states.features.sort(
+    (a, b) => b.properties.val - a.properties.val,
+  );
 
   const countries = await json('dist/data/countries.geojson');
   const countriesData = await csv('dist/data/countries.csv');
@@ -80,14 +83,14 @@ import makeCountriesStatic from '../print/countriesStatic';
 
   const resize = () => {
     makeStates(states);
-    makeCounties(counties, countiesData);
     makeCountries(countries, countriesData);
     makeCountriesStatic(countries, countriesData);
+    makeCounties(counties, countiesData);
   };
 
   window.addEventListener('resize', () => {
     resize();
   });
-
+  console.log('resizing');
   resize();
 })();

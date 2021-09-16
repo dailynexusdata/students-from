@@ -71,7 +71,8 @@ const makePlot = (map) => {
     .append('path')
     .attr('d', path)
     .attr('fill', 'none')
-    .attr('stroke', 'black');
+    .attr('stroke', 'black')
+    .attr('stroke-width', 0.75);
 
   const radius = scaleLinear()
     .domain(
@@ -80,7 +81,7 @@ const makePlot = (map) => {
         (d) => d.properties.val,
       ),
     )
-    .range([3, 26]);
+    .range([3, 22]);
 
   // console.log(radius.domain(), radius.range());
 
@@ -89,7 +90,12 @@ const makePlot = (map) => {
     .attr('cx', (d) => path.centroid(d)[0])
     .attr('cy', (d) => path.centroid(d)[1])
     .attr('r', (d) => (d.properties.NAME === 'California' ? 0 : radius(d.properties.val)))
-    .attr('fill', 'red');
+    .attr('fill', '#2171B5')
+    .attr('stroke', 'white')
+    .attr('stroke-width', 0.8)
+    .on('mouseenter', (_, d) => {
+      console.log(d.properties);
+    });
 
   const topStates = map.features
     .sort((a, b) => b.properties.val - a.properties.val)
@@ -111,7 +117,7 @@ const makePlot = (map) => {
     )
     .append('path')
     .attr('fill', 'none')
-    .attr('stroke', 'green')
+    .attr('stroke', '#6BAED6')
     .attr('stroke-width', (d) => arcWidth(d.properties.val))
     .attr('d', (d) => {
       const start = path.centroid(d);
@@ -136,6 +142,9 @@ const makePlot = (map) => {
       else if (d.properties.NAME === 'Oregon') {
         yOffset = 150;
         xOffset = 100;
+      }
+      else if (d.properties.NAME === 'New Jersey') {
+        yOffset = 230;
       }
 
       const midStr = `${midX - xOffset} ${maxY - yOffset}`;

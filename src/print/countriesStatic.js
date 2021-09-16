@@ -72,7 +72,7 @@ const makePlot = (map, data) => {
 
   const path = geoPath().projection(projection);
 
-  const nBins = 5;
+  const nBins = 7;
   const binColor = scaleThreshold()
     .domain(
       ckmeans(
@@ -80,14 +80,22 @@ const makePlot = (map, data) => {
         nBins,
       ).map((d) => min(d)),
     )
-    .range(schemeBlues[nBins]);
-
+    .range(schemeBlues[nBins + 2]);
+  console.log(
+    ckmeans(
+      data.map((d) => +d.y21),
+      nBins,
+    ),
+  );
   console.log(binColor.domain(), binColor.range());
 
   countries
     .append('path')
-    .attr('fill', (d) => binColor(d.properties.val))
+    .attr('fill', (d) => (d.properties.name === 'United States of America'
+      ? 'none'
+      : binColor(d.properties.val)))
     .attr('stroke', 'black')
+    .attr('stroke-width', 0.5)
     .attr('d', path);
 };
 

@@ -68,8 +68,7 @@ const makePlot = (map, data) => {
   /*
      Start Plot:
    */
-
-  const nBins = 5;
+  const nBins = 7;
   const binColor = scaleThreshold()
     .domain(
       ckmeans(
@@ -77,7 +76,7 @@ const makePlot = (map, data) => {
         nBins,
       ).map((d) => min(d)),
     )
-    .range(schemeBlues[nBins]);
+    .range(schemeBlues[nBins + 2]);
 
   const states = svg
     .selectAll('path')
@@ -85,11 +84,13 @@ const makePlot = (map, data) => {
     .enter()
     .append('path')
     // .attr('fill', 'none')
-    .attr('fill', (d) => (d.properties.val > -1 ? binColor(d.properties.val) : 'none'))
+    .attr('fill', (d) => (d.properties.name === 'United States of America'
+      || d.properties.val === -1
+      ? 'none'
+      : binColor(d.properties.val)))
     .attr('stroke', 'black')
+    .attr('stroke-width', 0.5)
     .attr('d', geoPath().projection(projection));
-
-  svg.attr('background', 'blue');
 
   //   let i = 1;
   //   setInterval(() => {

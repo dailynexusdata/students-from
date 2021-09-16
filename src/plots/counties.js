@@ -211,11 +211,10 @@ const makePlot = (map) => {
   counties
     .append('path')
     .attr('d', path)
-    .attr('fill', '#d3d3d322')
+    // .attr('fill', '#d3d3d322')
+    .attr('fill', 'none')
     .attr('stroke', 'black')
-    .on('mouseenter', (_, d) => {
-      console.log(d.properties.name);
-    });
+    .attr('stroke-width', 0.5);
 
   const radius = scaleLinear()
     .domain(extent(map.features, (d) => d.properties.pct))
@@ -232,10 +231,10 @@ const makePlot = (map) => {
 
       const output = makeDots(
         poly.map(projection),
-        Math.floor(d.properties.val / 20),
+        Math.floor(d.properties.val / 30),
         {
-          distance: 1,
-          edgeDistance: 3,
+          distance: 3,
+          edgeDistance: 1.3,
         },
       );
 
@@ -249,7 +248,9 @@ const makePlot = (map) => {
     .attr('cx', (d) => d[0])
     .attr('cy', (d) => d[1])
     .attr('r', (d) => radius(d.properties.pct))
-    .attr('fill', 'red');
+    .attr('fill', '#08519C')
+    .attr('stroke', 'white')
+    .attr('stroke-width', 0.1);
 };
 
 export default makePlot;
