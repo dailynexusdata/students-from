@@ -1,0 +1,165 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tigris)
+library(sf)
+library(tidyverse)
+```
+
+```{r}
+map <- tigris::states()
+states <- read.csv("states.csv")
+
+long <- states %>%
+  gather("year", val, -State) %>%
+  mutate(
+    year = str_replace_all(year, "X", "")
+  )
+```
+
+
+```{r}
+states %>%
+  filter(State %in% c("Washingotn", "New York"))
+```
+
+
+```{r, fig.height=8}
+ggplot(states %>% filter(State != "California")) +
+  geom_bar(aes(x = State, y = X2021), stat="identity") +
+  scale_x_discrete(limits= states %>% arrange(X2021) %>% pull(State)) +
+  coord_flip()
+```
+
+```{r}
+states %>% 
+  select(name=State, val=X2021) %>%
+  write.csv("statesData.csv", row.names=F)
+```
+
+
+```{r, fig.width=10}
+ggplot(long %>% filter(State != "California")) +
+  geom_line(aes(x = year, y = val, group=State, color=State))
+ggplot(long %>% filter(State %in% c("Washingotn", "New York", "Illinois", "New Jersey", "Texas", "Massachusetts"))) +
+  geom_line(aes(x = year, y = val, group=State, color=State))
+```
+
+```{r}
+twentyYearChange <- states %>%
+  mutate(diff = X2021 - X2001)
+
+twentyYearChange %>%
+  filter(diff < 0) %>%
+  arrange(diff)
+```
+
+```{r}
+twentyYearChange %>%
+  arrange(desc(diff))
+```
+
+
+```{r}
+year.totals <- long %>%
+  group_by(year) %>%
+  summarise(
+    total = sum(val)
+  ) %>% 
+  ungroup()
+
+caPct <- long %>%
+  filter(State == "California") %>%
+  inner_join(
+    year.totals,
+    by="year"
+  ) %>%
+  mutate(
+    pct = val / total
+  ) 
+
+caPct
+
+0.9206696-0.9054027
+
+caPct %>%
+  ggplot() +
+    geom_line(aes(x=year, y=pct, group=State)) +
+    geom_point(aes(x=year, y=pct))
+```
+
+```{r}
+long %>%
+  filter(State == "California")
+```
+
+
+```{r}
+long %>%
+  filter(State == "California") %>%
+  ggplot() +
+    geom_line(aes(x=year, y=val, group=State)) +
+    scale_y_continuous(limits=c(0, 23000))
+```
+
+```{r}
+long %>% filter(State %in% c("Washingotn", "New York", "Illinois", "New Jersey", "Texas")) %>%
+  select(-State) %>%
+  group_by(year) %>%
+  summarise_all(sum) %>%
+  ungroup() %>%
+  ggplot() +
+    geom_line(aes(x=year, y=val, group=1)) +
+    scale_y_continuous(limits=c(0, 1500))
+  
+long %>% filter(State %in% c("Washingotn", "New York", "Illinois", "New Jersey", "Texas")) %>%
+  select(-State) %>%
+  group_by(year) %>%
+  summarise_all(sum) %>%
+  arrange(desc(year))
+
+801-615
+```
+
+
+```{r}
+long %>%
+  filter(State != "California") %>%
+  select(-State) %>%
+  group_by(year) %>%
+  summarise_all(sum) %>%
+  ungroup() %>%
+  ggplot() +
+    geom_line(aes(x=year, y=val, group=1)) +
+    scale_y_continuous(limits=c(0, 2500))
+```
+
+```{r}
+long %>%
+  filter(State != "California") %>%
+  select(-State) %>%
+  group_by(year) %>%
+  summarise_all(sum) %>%
+  arrange(desc(year))
+
+# instate increase since 2018
+long %>%
+  filter(State == "California") 
+22205 - 21888
+(22205 - 20010)/20010# since start
+
+# Out of state increase since 2018
+2320 - 1886
+(2320 - 1760)
+(2320 - 1760) / 1760
+
+
+# top 5 states out of out of state change
+186 / (2320 - 1886)
+
+(2320 - 1886) / 1886 * 100
+```
+

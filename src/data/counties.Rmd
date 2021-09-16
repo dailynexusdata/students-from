@@ -1,0 +1,133 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tigris)
+library(sf)
+library(tidyverse)
+```
+
+```{r}
+map <- tigris::counties("CA")
+counties <- read.csv("counties.csv")
+
+long <- counties %>%
+  gather("year", val, -Name) %>%
+  mutate(
+    year = str_replace_all(year, "X", "")
+  )
+```
+
+```{r}
+counties %>%
+  arrange(desc(X2021))
+```
+
+```{r}
+county.pct %>%
+  select(county, X2021) %>%
+  arrange(desc(X2021))
+```
+
+
+```{r}
+county.pct <- read.csv("county_census.csv") %>%
+  rename(county = 'ï..county') %>%
+  mutate(county = str_replace_all(county, "(\\.| County, California)", "")) %>%
+  filter(!(county %in% c("California"))) %>%
+  inner_join(
+    counties,
+    by=c("county"="Name")
+  ) %>%
+  mutate(
+    p10 = X2010.y / as.numeric(str_replace_all(X2010.x, ",", "")),
+    p11 = X2011.y / as.numeric(str_replace_all(X2011.x, ",", "")),
+    p12 = X2012.y / as.numeric(str_replace_all(X2012.x, ",", "")),
+    p13 = X2013.y / as.numeric(str_replace_all(X2013.x, ",", "")),
+    p14 = X2014.y / as.numeric(str_replace_all(X2014.x, ",", "")),
+    p15 = X2015.y / as.numeric(str_replace_all(X2015.x, ",", "")),
+    p16 = X2016.y / as.numeric(str_replace_all(X2016.x, ",", "")),
+    p17 = X2017.y / as.numeric(str_replace_all(X2017.x, ",", "")),
+    p18 = X2018.y / as.numeric(str_replace_all(X2018.x, ",", "")),
+    p19 = X2019.y / as.numeric(str_replace_all(X2019.x, ",", "")),
+    p1921 = X2021 / as.numeric(str_replace_all(X2019.x, ",", ""))
+  )
+
+county.pct %>%
+  arrange(desc(p1921, p19)) %>%
+  select(county, p1921, p19)
+
+county.pct %>%
+  mutate(chng = p19 / p10) %>%
+  arrange(desc(chng))
+
+county.pct %>%
+  select(
+    county,
+    p10,
+    p11,
+    p12,
+    p13,
+    p14,
+    p15,
+    p16,
+    p17,
+    p18,
+    p19,
+    p1921
+  ) %>%
+  gather("year", "val", -county) %>%
+  ggplot() +
+    geom_line(aes(x=year, y=val, group=county, color=county))
+```
+
+```{r}
+0.0023650669/ 0.0012576743	
+```
+
+
+```{r}
+counties %>%
+  arrange(desc(X2021))
+```
+
+
+```{r}
+long %>%
+  ggplot() +
+    geom_line(aes(x=year, y=val, group=Name, color=Name))
+```
+# Map Data
+
+```{r}
+county.pct %>%
+  select(
+    county,
+    p10,
+    p11,
+    p12,
+    p13,
+    p14,
+    p15,
+    p16,
+    p17,
+    p18,
+    p19,
+    v10 = X2010.y,
+    v11 = X2011.y,
+    v12 = X2012.y,
+    vp13 = X2013.y,
+    v14 = X2014.y,
+    v15 = X2015.y,
+    v16 = X2016.y,
+    v17 = X2017.y,
+    v18 = X2018.y,
+    v19 = X2019.y,
+    v20 = X2020,
+    v21 = X2021,
+  ) %>% gather("key", "val", -county) %>%
+  write.csv("countiesData.csv", row.names=F)
+```
+
