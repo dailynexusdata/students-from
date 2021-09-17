@@ -84,8 +84,7 @@ const makePlot = (map, data) => {
     .enter()
     .append('path')
     // .attr('fill', 'none')
-    .attr('fill', (d) => (d.properties.name === 'United States of America'
-      || d.properties.val === -1
+    .attr('fill', (d) => (d.properties.name === 'United States of America' || d.properties.val <= 0
       ? 'none'
       : binColor(d.properties.val)))
     .attr('stroke', 'black')

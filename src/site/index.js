@@ -19,16 +19,24 @@ import makeCountriesStatic from '../print/countriesStatic';
   states.features = states.features.filter(
     (d) => d.properties.NAME !== 'Puerto Rico',
   );
-  const statesData = await csv('dist/data/statesData.csv', (d) => ({
-    ...d,
-    val: +d.val,
-  }));
+  const statesData = nest()
+    .key((d) => d.name)
+    .entries(
+      await csv('dist/data/statesData.csv', (d) => ({
+        ...d,
+        val: +d.val,
+        year: +d.year,
+      })),
+    )
+    .sort((a, b) => b.values[0].val - a.values[0].val);
 
-  statesData.forEach((d) => {
+  statesData.forEach((d, i) => {
     const prop = states.features.find(
-      (c) => c.properties.NAME === d.name,
+      (c) => c.properties.NAME === d.key,
     ).properties;
-    prop.val = d.val;
+    prop.val = d.values[0].val;
+    prop.values = d.values;
+    prop.rank = i + 1;
   });
   states.features = states.features.sort(
     (a, b) => b.properties.val - a.properties.val,
@@ -45,8 +53,6 @@ import makeCountriesStatic from '../print/countriesStatic';
     };
     return { ...d, properties: prop };
   });
-
-  console.log(countries, countriesData);
 
   const counties = await json('dist/data/counties.geojson');
   const countiesData = await csv('dist/data/countiesData.csv', (d) => ({
@@ -83,14 +89,12 @@ import makeCountriesStatic from '../print/countriesStatic';
 
   const resize = () => {
     makeStates(states);
+    makeCounties(counties, countiesData);
     makeCountries(countries, countriesData);
     makeCountriesStatic(countries, countriesData);
-    makeCounties(counties, countiesData);
   };
-
   window.addEventListener('resize', () => {
     resize();
   });
-  console.log('resizing');
   resize();
 })();

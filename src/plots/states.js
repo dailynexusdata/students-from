@@ -4,10 +4,13 @@
  * @author alex
  *
  */
-import { select } from 'd3-selection';
+import { select, pointer } from 'd3-selection';
 import { geoPath, geoAlbersUsa } from 'd3-geo';
 import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
+import { format } from 'd3-format';
+
+import makeStateTimeseries from './states_ts';
 
 /**
  * @param {*} map - states geojson
@@ -42,8 +45,13 @@ const makePlot = (map) => {
     bottom: 10,
     left: 10,
   };
+  const hoverArea = container
+    .append('div')
+    .style('position', 'relative')
+    .style('display', 'flex')
+    .style('justify-content', 'center');
 
-  const svg = container
+  const svg = hoverArea
     .append('svg')
     .attr('height', size.height)
     .attr('width', size.width);
@@ -67,13 +75,28 @@ const makePlot = (map) => {
 
   const states = svg.selectAll('path').data(map.features).enter();
 
+  /*
+    Map:
+
+   */
+
   states
     .append('path')
     .attr('d', path)
     .attr('fill', 'none')
     .attr('stroke', 'black')
-    .attr('stroke-width', 0.75);
+    .attr('stroke-width', 0.75)
+    .attr(
+      'id',
+      (d) => `laby-where-students-from-state-${d.properties.NAME.replace(
+        / /g,
+        '-',
+      )}`,
+    );
 
+  /**
+   * Circles:
+   */
   const radius = scaleLinear()
     .domain(
       extent(
@@ -92,11 +115,11 @@ const makePlot = (map) => {
     .attr('r', (d) => (d.properties.NAME === 'California' ? 0 : radius(d.properties.val)))
     .attr('fill', '#2171B5')
     .attr('stroke', 'white')
-    .attr('stroke-width', 0.8)
-    .on('mouseenter', (_, d) => {
-      console.log(d.properties);
-    });
+    .attr('stroke-width', 0.8);
 
+  /**
+   * Arches:
+   */
   const topStates = map.features
     .sort((a, b) => b.properties.val - a.properties.val)
     .filter((d) => d.properties.NAME !== 'California')
@@ -149,6 +172,67 @@ const makePlot = (map) => {
 
       const midStr = `${midX - xOffset} ${maxY - yOffset}`;
       return `M ${startStr} Q ${midStr}, ${endStr}`;
+    });
+
+  /**
+   * Tooltip:
+   */
+  const tooltip = hoverArea
+    .append('div')
+    .style('display', 'none')
+    .style('pointer-events', 'none')
+    .style('position', 'absolute')
+    .style('background-color', 'white')
+    .style('padding', '10px')
+    .style('border-radius', '10px')
+    .style('border', '1px solid #d3d3d3');
+
+  const overlay = states
+    .append('path')
+    .attr('d', path)
+    .attr('fill-opacity', 0)
+    .on('mouseenter', (_, d) => {
+      tooltip.style('display', 'block');
+      tooltip.selectAll('*').remove();
+      tooltip.append('h3').text(d.properties.NAME);
+      tooltip
+        .append('hr')
+        .style('margin', '3px 0')
+        .style('border', 'none')
+        .style('border-top', '1px solid #d3d3d3');
+      tooltip
+        .append('p')
+        .text(`# Students 2020-21: ${format(',')(d.properties.val)}`);
+      tooltip.append('p').text(`Rank: ${d.properties.rank}`);
+
+      const ts = tooltip.append('div');
+
+      makeStateTimeseries(ts, d.properties.values);
+    })
+    .on('mousemove', (event, d) => {
+      select(
+        `#laby-where-students-from-state-${d.properties.NAME.replace(
+          / /g,
+          '-',
+        )}`,
+      ).attr('stroke-width', 1.5);
+
+      const width = 200;
+      const [mouseX, mouseY] = pointer(event);
+
+      tooltip
+        .style('width', `${width}px`)
+        .style('left', `${Math.min(mouseX, size.width - width - 30)}px`)
+        .style('top', `${mouseY + 10}px`);
+    })
+    .on('mouseleave', (event, d) => {
+      select(
+        `#laby-where-students-from-state-${d.properties.NAME.replace(
+          / /g,
+          '-',
+        )}`,
+      ).attr('stroke-width', 0.75);
+      tooltip.style('display', 'none');
     });
 };
 

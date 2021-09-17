@@ -35,9 +35,13 @@ ggplot(states %>% filter(State != "California")) +
 ```
 
 ```{r}
-states %>% 
-  select(name=State, val=X2021) %>%
+long %>%
+  rename(name=State) %>%
   write.csv("statesData.csv", row.names=F)
+
+#states %>% 
+#  select(name=State, val=X2021) %>%
+#  write.csv("statesData.csv", row.names=F)
 ```
 
 

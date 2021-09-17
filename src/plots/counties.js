@@ -174,7 +174,7 @@ const makePlot = (map) => {
 
   const size = {
     height: 600,
-    width: 400,
+    width: Math.min(window.innerWidth - 40, 600),
   };
 
   const margin = {
@@ -183,6 +183,8 @@ const makePlot = (map) => {
     bottom: 10,
     left: 10,
   };
+
+  container.style('width', `${size.width}px`);
 
   const svg = container
     .append('svg')
@@ -220,37 +222,39 @@ const makePlot = (map) => {
     .domain(extent(map.features, (d) => d.properties.pct))
     .range([0.6, 3.5]);
 
-  counties
-    .append('g')
-    .selectAll('circle')
-    .data((d, i) => {
-      const poly =
-        d.geometry.coordinates[0][0].length === 2
-          ? d.geometry.coordinates[0]
-          : d.geometry.coordinates[0][0];
+  setTimeout(() => {
+    counties
+      .append('g')
+      .selectAll('circle')
+      .data((d, i) => {
+        const poly =
+          d.geometry.coordinates[0][0].length === 2
+            ? d.geometry.coordinates[0]
+            : d.geometry.coordinates[0][0];
 
-      const output = makeDots(
-        poly.map(projection),
-        Math.floor(d.properties.val / 30),
-        {
-          distance: 3,
-          edgeDistance: 1.3,
-        },
-      );
+        const output = makeDots(
+          poly.map(projection),
+          Math.floor(d.properties.val / 30),
+          {
+            distance: 3,
+            edgeDistance: 1.3,
+          },
+        );
 
-      return output.map((o) => {
-        o.properties = { ...d.properties };
-        return o;
-      });
-    })
-    .enter()
-    .append('circle')
-    .attr('cx', (d) => d[0])
-    .attr('cy', (d) => d[1])
-    .attr('r', (d) => radius(d.properties.pct))
-    .attr('fill', '#08519C')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 0.1);
+        return output.map((o) => {
+          o.properties = { ...d.properties };
+          return o;
+        });
+      })
+      .enter()
+      .append('circle')
+      .attr('cx', (d) => d[0])
+      .attr('cy', (d) => d[1])
+      .attr('r', (d) => radius(d.properties.pct))
+      .attr('fill', '#08519C')
+      .attr('stroke', 'white')
+      .attr('stroke-width', 0.1);
+  }, 0);
 };
 
 export default makePlot;
