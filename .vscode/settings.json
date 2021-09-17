@@ -9,5 +9,6 @@
     },
     "files.watcherExclude": {
         "**/target": true
-    }
+    },
+    "cmake.configureOnOpen": false
 }

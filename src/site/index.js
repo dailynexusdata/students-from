@@ -13,6 +13,7 @@ import makeStates from '../plots/states';
 import makeCountries from '../plots/countries';
 import makeCounties from '../plots/counties';
 import makeCountriesStatic from '../print/countriesStatic';
+import makeCountiesTs from '../plots/counties_ts';
 
 (async () => {
   const states = await json('dist/data/states.geojson');
@@ -74,6 +75,16 @@ import makeCountriesStatic from '../print/countriesStatic';
       prop.pct = d.values[0].val;
     });
 
+  const countiesPctData = nest()
+    .key((d) => d.county)
+    .entries(
+      await csv('dist/data/countiesPctData.csv', (d) => ({
+        county: d.county,
+        year: 2000 + +d.year.slice(1),
+        val: +d.val,
+      })),
+    );
+
   // const statesMapFiltered = {
   //   geometries: states.objects.states.geometries.filter(
   //     (d) => ![
@@ -92,6 +103,7 @@ import makeCountriesStatic from '../print/countriesStatic';
     makeCounties(counties, countiesData);
     makeCountries(countries, countriesData);
     makeCountriesStatic(countries, countriesData);
+    makeCountiesTs(countiesPctData);
   };
   window.addEventListener('resize', () => {
     resize();

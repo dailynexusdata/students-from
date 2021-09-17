@@ -3,16 +3,76 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 ```{r}
-plot(cars)
+library(tigris)
+library(sf)
+library(tidyverse)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+```{r}
+countries <- read.csv("countries.csv")
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+long <- countries %>%
+  gather("year", val, -Country) %>%
+  mutate(
+    year = as.numeric(str_replace_all(year, "y", "20"))
+  )
+```
+
+
+```{r, fig.width=10}
+ggplot(long %>% filter(Country != "China")) +
+  geom_line(aes(x=year, y=val, color=Country)) +
+  theme(legend.position="none")
+```
+```{r}
+totals <- long %>%
+  group_by(year) %>%
+  summarise(total = sum(val)) 
+
+totals
+
+# total outside of US:
+#2010-11 : 847
+#2020-21 : 3969
+
+countries %>%
+  arrange(desc(y21))
+
+3969-847
+
+ggplot(totals) +
+  geom_line(aes(x=year, y=total))
+
+totals %>%
+  left_join(
+    long %>% filter(Country == "China")
+  ) %>%
+  mutate(pctChina = val / total)
+```
+
+```{r}
+cs <- data.frame(
+  year=c(2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021),
+  us=c(23358, 22728, 22584, 22516, 22818, 22932, 23392, 23773, 24395, 24155, 24525),
+  other=c(847, 959, 1255, 1473, 1820, 2159, 2566, 2970, 3528, 4143, 3969)
+)
+
+cs %>%
+  mutate(pctF = other / (us + other))
+
+24155-23358
+4143-847
+
+mean(cs$us)
+
+ggplot(cs) +
+  geom_line(aes(x=year, y=us)) +
+  scale_y_continuous(lim=c(0, 25000))
+
+ggplot(cs) + 
+  geom_line(aes(x=year, y=other))  +
+  scale_y_continuous(lim=c(0, 5000))
+```
+

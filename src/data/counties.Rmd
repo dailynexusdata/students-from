@@ -79,6 +79,7 @@ county.pct %>%
     p1921
   ) %>%
   gather("year", "val", -county) %>%
+  #write.csv("countiesPctData.csv")
   ggplot() +
     geom_line(aes(x=year, y=val, group=county, color=county))
 ```

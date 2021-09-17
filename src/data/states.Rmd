@@ -20,6 +20,15 @@ long <- states %>%
   )
 ```
 
+```{r}
+long %>%
+  group_by(year) %>%
+  summarise(total = sum(val))
+
+24525-21770
+24525-23358
+```
+
 
 ```{r}
 states %>%
