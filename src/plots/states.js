@@ -10,6 +10,7 @@ import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
 import { format } from 'd3-format';
 
+import { arc } from 'd3-shape';
 import makeStateTimeseries from './states_ts';
 
 /**
@@ -32,10 +33,14 @@ const makePlot = (map) => {
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
-  container.append('h1').text('My title');
+  container
+    .append('h1')
+    .text(
+      'New York and Washington Tie for Most Out-Of-State Students in the 2020-21 School Year',
+    );
 
   const size = {
-    height: 600,
+    height: 570,
     width: Math.min(800, window.innerWidth - 40),
   };
 
@@ -56,7 +61,13 @@ const makePlot = (map) => {
     .attr('height', size.height)
     .attr('width', size.width);
 
-  container.append('a').text('Source: __________').attr('href', '');
+  container
+    .append('a')
+    .text("Source: UCSB Registrar's 3rd Week Registration Report")
+    .attr(
+      'href',
+      'https://bap.ucsb.edu/institutional-research/registration-reports',
+    );
 
   /*
     Create Scales:
@@ -140,7 +151,7 @@ const makePlot = (map) => {
     )
     .append('path')
     .attr('fill', 'none')
-    .attr('stroke', '#6BAED6')
+    .attr('stroke', '#EDC949')
     .attr('stroke-width', (d) => arcWidth(d.properties.val))
     .attr('d', (d) => {
       const start = path.centroid(d);
@@ -202,7 +213,7 @@ const makePlot = (map) => {
         .style('border-top', '1px solid #d3d3d3');
       tooltip
         .append('p')
-        .text(`# Students 2020-21: ${format(',')(d.properties.val)}`);
+        .text(`# Students in 2020-21: ${format(',')(d.properties.val)}`);
       tooltip.append('p').text(`Rank: ${d.properties.rank}`);
 
       const ts = tooltip.append('div');
@@ -234,6 +245,74 @@ const makePlot = (map) => {
       ).attr('stroke-width', 0.75);
       tooltip.style('display', 'none');
     });
+
+  const cSizes = [10, 100, 200];
+
+  const legendArea = svg
+    .append('g')
+    .attr(
+      'transform',
+      `translate(${(size.width * 3) / 5 - 50}, ${margin.top + 16})`,
+    );
+  // .attr(
+  //   'transform',
+  //   `translate(${(size.width * 3) / 5}, ${
+  //     size.height - margin.bottom - radius(cSizes[cSizes.length - 1]) * 2
+  //   })`,
+  // );
+
+  legendArea
+    .selectAll('circle')
+    .data(cSizes)
+    .enter()
+    .append('circle')
+    .attr('fill', 'none')
+    // .attr('fill', '#2171B5')
+    // .attr('fill-opacity', 1 / 3)
+    .attr('cx', radius(cSizes[cSizes.length - 1]))
+    .attr('cy', (d) => 2 * radius(cSizes[cSizes.length - 1]) - radius(d))
+    .attr('r', (d) => radius(d))
+    .attr('stroke', '#2171B5');
+  // .attr('stroke', 'black');
+
+  legendArea
+    .selectAll('line')
+    .data(cSizes)
+    .enter()
+    .append('line')
+    .attr('x1', radius(cSizes[cSizes.length - 1]))
+    .attr('x2', radius(cSizes[cSizes.length - 1]) * 2 + 20)
+    .attr('y1', (d) => 2 * radius(cSizes[cSizes.length - 1]) - 2 * radius(d))
+    .attr('y2', (d) => 2 * radius(cSizes[cSizes.length - 1]) - 2 * radius(d))
+    .attr('stroke', 'black')
+    .attr('stroke-width', 0.5)
+    .attr('stroke-dasharray', '3,3');
+
+  legendArea
+    .selectAll('text')
+    .data(cSizes)
+    .enter()
+    .append('text')
+    .attr('alignment-baseline', 'middle')
+    .attr('x', radius(cSizes[cSizes.length - 1]) * 2 + 20)
+    .attr('y', (d) => 2 * radius(cSizes[cSizes.length - 1]) - 2 * radius(d))
+    .text((d, i) => d + (i === cSizes.length - 1 ? ' students' : ''));
+
+  legendArea.append('text').text('# students 2020-21').attr('y', -14);
+
+  const arcLegendArea = svg
+    .append('g')
+    .attr('transform', `translate(${(size.width * 3) / 5 + 140}, -1)`);
+
+  arcLegendArea
+    .append('path')
+    .attr('fill', 'none')
+    .attr('stroke', '#EDC949')
+    .attr('stroke-width', 2)
+    .attr('d', 'M 40 12 Q 60 0, 80 12');
+  arcLegendArea.append('text').attr('y', 32).text('Indicates a state');
+  arcLegendArea.append('text').attr('y', 48).text('with top 7 number');
+  arcLegendArea.append('text').attr('y', 64).text('of students.');
 };
 
 export default makePlot;

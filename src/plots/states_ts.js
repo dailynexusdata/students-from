@@ -33,7 +33,7 @@ const makePlot = (container, data) => {
     .domain([0, max(data, (d) => d.val)])
     .range([size.height - margin.bottom, margin.top]);
 
-  console.log(x.domain(), y.domain());
+  // console.log(x.domain(), y.domain());
 
   // this calculates the path of our line
   // it always starts with d3.line() and then we have to specify the x and y pixel values

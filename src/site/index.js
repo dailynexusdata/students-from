@@ -14,6 +14,7 @@ import makeCountries from '../plots/countries';
 import makeCounties from '../plots/counties';
 import makeCountriesStatic from '../print/countriesStatic';
 import makeCountiesTs from '../plots/counties_ts';
+import makeOutOfStateBars from '../plots/outOfStateBar';
 
 (async () => {
   const states = await json('dist/data/states.geojson');
@@ -100,6 +101,12 @@ import makeCountiesTs from '../plots/counties_ts';
 
   const resize = () => {
     makeStates(states);
+    makeOutOfStateBars({
+      ...states,
+      features: states.features.filter(
+        (d) => d.properties.NAME !== 'California',
+      ),
+    });
     makeCounties(counties, countiesData);
     makeCountries(countries, countriesData);
     makeCountriesStatic(countries, countriesData);

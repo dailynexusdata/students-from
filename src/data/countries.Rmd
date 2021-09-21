@@ -20,6 +20,11 @@ long <- countries %>%
   )
 ```
 
+```{r}
+long %>% filter(Country == "China")
+```
+
+
 
 ```{r, fig.width=10}
 ggplot(long %>% filter(Country != "China")) +

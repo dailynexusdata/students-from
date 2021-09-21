@@ -170,7 +170,11 @@ const makePlot = (map) => {
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
-  container.append('h1').text('My title');
+  container
+    .append('h1')
+    .text(
+      'Los Angeles County had the most UCSB Students of Counties in California for the 2020-21 School Year',
+    );
 
   const size = {
     height: 600,
@@ -191,7 +195,40 @@ const makePlot = (map) => {
     .attr('height', size.height)
     .attr('width', size.width);
 
-  container.append('a').text('Source: __________').attr('href', '');
+  const sourceContainer = container
+    .append('p')
+    .style('display', 'inline-block')
+    .style('overflow-wrap', 'break-word')
+    .style('word-break', 'break-word')
+    .style('word-break', 'normal')
+    .text('Source: ');
+
+  sourceContainer
+    .append('span')
+    .style('display', 'inline-block')
+    .append('a')
+    .text("UCSB Registrar's 3rd Week Registration Report")
+    .attr(
+      'href',
+      'https://bap.ucsb.edu/institutional-research/registration-reports',
+    );
+  sourceContainer.append('p').style('display', 'inline-block').text(', ');
+  sourceContainer
+    .append('span')
+    .style('word-wrap', 'normal')
+    .style('word-break', 'break-word')
+    .style('display', 'inline')
+    .style('overflow-wrap', 'break-word')
+    .append('a')
+    .style('word-wrap', 'normal')
+    .style('display', 'inline')
+    .style('word-break', 'break-word')
+    .style('overflow-wrap', 'break-word')
+    .text(' US Census 2019 population estimates.')
+    .attr(
+      'href',
+      'https://www.census.gov/data/tables/time-series/demo/popest/2010s-counties-total.html',
+    );
 
   /*
      Create Scales:
@@ -255,6 +292,153 @@ const makePlot = (map) => {
       .attr('stroke', 'white')
       .attr('stroke-width', 0.1);
   }, 0);
+
+  /**
+   * SB County label
+   */
+  const labels = svg.append('g');
+  svg
+    .append('text')
+    .text('Santa Barbara County')
+    .attr('fill', '#08519C')
+    .attr('font-weight', 'bold')
+    .attr('font-size', '10pt')
+    .attr('x', 25)
+    .attr('y', 410);
+
+  svg
+    .append('text')
+    .text('had the most students')
+    .attr('fill', '#08519C')
+    .attr('font-weight', 'bold')
+    .attr('font-size', '10pt')
+    .attr('x', 25)
+    .attr('y', 422);
+  svg
+    .append('text')
+    .text('per county population')
+    .attr('fill', '#08519C')
+    .attr('font-weight', 'bold')
+    .attr('font-size', '10pt')
+    .attr('x', 25)
+    .attr('y', 434);
+
+  labels
+    .append('svg:defs')
+    .append('svg:marker')
+    .attr('id', 'where-students-from-county-triangle2')
+    .attr('refX', 4)
+    .attr('refY', 2)
+    .attr('markerWidth', 4)
+    .attr('markerHeight', 4)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M 4 0 0 2 4 4')
+    .attr('fill', '#08519C');
+
+  labels
+    .append('path')
+    .attr('d', 'M 185 450 Q 155 465, 140 440')
+    .attr('stroke', '#08519C')
+    .attr('fill', 'none')
+    .attr('stroke-width', 2)
+    .attr('marker-start', 'url(#where-students-from-county-triangle2)');
+  /**
+   *
+   * LA Label
+   */
+
+  labels
+    .append('path')
+    .attr('d', 'M 272 508 Q 255 530, 230 540')
+    .attr('fill', 'none')
+    .attr('stroke', '#08519C')
+    .attr('stroke-width', 2)
+    .attr('marker-start', 'url(#where-students-from-county-triangle2)');
+
+  svg
+    .append('text')
+    .text('Los Angeles County')
+    .attr('fill', '#08519C')
+    .attr('font-weight', 'bold')
+    .attr('font-size', '10pt')
+    .attr('x', 80)
+    .attr('y', 535);
+
+  svg
+    .append('text')
+    .text('had the most students')
+    .attr('fill', '#08519C')
+    .attr('font-weight', 'bold')
+    .attr('font-size', '10pt')
+    .attr('x', 80)
+    .attr('y', 547);
+  svg
+    .append('text')
+    .text('in total.')
+    .attr('fill', '#08519C')
+    .attr('font-weight', 'bold')
+    .attr('font-size', '10pt')
+    .attr('x', 80)
+    .attr('y', 559);
+
+  /**
+   * legend
+   */
+
+  const boxLegend = svg.append('g').attr('transform', 'translate(380, 160)');
+
+  boxLegend
+    .append('rect')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('height', 20)
+    .attr('fill', 'none')
+    .attr('stroke', 'black')
+    .attr('width', 20);
+
+  boxLegend
+    .append('circle')
+    .attr('cx', 10)
+    .attr('cy', 10)
+    .attr('r', 2)
+    .attr('fill', '#08519C');
+
+  boxLegend
+    .append('text')
+    .text('Each circle represents')
+    .attr('x', 30)
+    .attr('y', 12);
+
+  boxLegend.append('text').text('30 students.').attr('x', 30).attr('y', 30);
+
+  const radLegend = svg.append('g').attr('transform', 'translate(380, 270)');
+
+  radLegend
+    .selectAll('circle')
+    .data([0.001, 0.002])
+    .enter()
+    .append('circle')
+    .attr('cx', 10)
+    .attr('cy', (_, i) => i * 20)
+    .attr('r', (d) => radius(d))
+    .attr('fill', '#08519C');
+
+  radLegend
+    .selectAll('text')
+    .data([0.001, 0.002])
+    .enter()
+    .append('text')
+    .text((d, i) => `${d * 100}%${i === 0 ? ' of county population' : ''}`)
+    .attr('alignment-baseline', 'middle')
+    .attr('x', 20)
+    .attr('y', (_, i) => i * 20);
+
+  radLegend.append('text').attr('y', -44).text('Circle size shows the');
+
+  radLegend.append('text').attr('y', -30).text('total # of students');
+
+  radLegend.append('text').attr('y', -16).text('per county population.');
 };
 
 export default makePlot;

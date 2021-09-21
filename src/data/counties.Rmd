@@ -10,7 +10,7 @@ library(tidyverse)
 ```
 
 ```{r}
-map <- tigris::counties("CA")
+#map <- tigris::counties("CA")
 counties <- read.csv("counties.csv")
 
 long <- counties %>%
@@ -23,6 +23,9 @@ long <- counties %>%
 ```{r}
 counties %>%
   arrange(desc(X2021))
+
+counties %>%
+  arrange(X2021)
 ```
 
 ```{r}
@@ -55,6 +58,12 @@ county.pct <- read.csv("county_census.csv") %>%
     p1921 = X2021 / as.numeric(str_replace_all(X2019.x, ",", ""))
   )
 
+
+county.pct %>% 
+  filter(X2021 > 30) %>%
+  arrange(p19) %>%
+  select(county, p1921)
+
 county.pct %>%
   arrange(desc(p1921, p19)) %>%
   select(county, p1921, p19)
@@ -76,10 +85,10 @@ county.pct %>%
     p17,
     p18,
     p19,
-    p1921
+   # p1921
   ) %>%
   gather("year", "val", -county) %>%
-  #write.csv("countiesPctData.csv")
+  #write.csv("countiesPctData.csv", row.names=F)
   ggplot() +
     geom_line(aes(x=year, y=val, group=county, color=county))
 ```
