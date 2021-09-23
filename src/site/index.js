@@ -9,12 +9,14 @@ import { nest } from 'd3-collection';
 
 // import plot functions here:
 // import makePLOT_NAME from "./PLOT_NAME";
+// import makeStates from '../print/states';
 import makeStates from '../plots/states';
 import makeCountries from '../plots/countries';
+// import makeCounties from '../print/counties';
 import makeCounties from '../plots/counties';
-import makeCountriesStatic from '../print/countriesStatic';
-import makeCountiesTs from '../plots/counties_ts';
-import makeOutOfStateBars from '../plots/outOfStateBar';
+// import makeCountriesStatic from '../print/countriesStatic';
+// import makeCountiesTs from '../plots/counties_ts';
+// import makeOutOfStateBars from '../plots/outOfStateBar';
 
 (async () => {
   const states = await json('dist/data/states.geojson');
@@ -57,24 +59,24 @@ import makeOutOfStateBars from '../plots/outOfStateBar';
   });
 
   const counties = await json('dist/data/counties.geojson');
-  const countiesData = await csv('dist/data/countiesData.csv', (d) => ({
-    ...d,
-    val: +d.val,
-  }));
+  // const countiesData = await csv('dist/data/countiesData.csv', (d) => ({
+  //   ...d,
+  //   val: +d.val,
+  // }));
 
-  nest()
-    .key((d) => d.county)
-    .entries(countiesData.filter((d) => d.key === 'v21' || d.key === 'p19'))
-    .forEach((d) => {
-      const prop = counties.features.find(
-        (c) => c.properties.name === d.key,
-      ).properties;
-      // if (d.values[1].val < 10) {
-      //   console.log(d);
-      // }
-      prop.val = d.values[1].val;
-      prop.pct = d.values[0].val;
-    });
+  // nest()
+  //   .key((d) => d.county)
+  //   .entries(countiesData.filter((d) => d.key === 'v21' || d.key === 'p19'))
+  //   .forEach((d) => {
+  //     const prop = counties.features.find(
+  //       (c) => c.properties.name === d.key,
+  //     ).properties;
+  //     // if (d.values[1].val < 10) {
+  //     //   console.log(d);
+  //     // }
+  //     prop.val = d.values[1].val;
+  //     prop.pct = d.values[0].val;
+  //   });
 
   const countiesPctData = nest()
     .key((d) => d.county)
@@ -101,16 +103,16 @@ import makeOutOfStateBars from '../plots/outOfStateBar';
 
   const resize = () => {
     makeStates(states);
-    makeOutOfStateBars({
-      ...states,
-      features: states.features.filter(
-        (d) => d.properties.NAME !== 'California',
-      ),
-    });
-    makeCounties(counties, countiesData);
+    // makeOutOfStateBars({
+    //   ...states,
+    //   features: states.features.filter(
+    //     (d) => d.properties.NAME !== 'California',
+    //   ),
+    // });
+    makeCounties(counties);
     makeCountries(countries, countriesData);
-    makeCountriesStatic(countries, countriesData);
-    makeCountiesTs(countiesPctData);
+    // makeCountriesStatic(countries, countriesData);
+    // makeCountiesTs(countiesPctData);
   };
   window.addEventListener('resize', () => {
     resize();

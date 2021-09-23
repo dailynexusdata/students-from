@@ -18,6 +18,12 @@ long <- countries %>%
   mutate(
     year = as.numeric(str_replace_all(year, "y", "20"))
   )
+
+long %>%
+  filter(year == 2021) %>%
+  filter(val > 0) %>%
+  pull(Country) %>%
+  unique()
 ```
 
 ```{r}
@@ -39,7 +45,7 @@ totals <- long %>%
 totals
 
 # total outside of US:
-#2010-11 : 847
+#2010-11 : 847 --- from bap site
 #2020-21 : 3969
 
 countries %>%

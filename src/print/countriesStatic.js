@@ -36,6 +36,7 @@ const makePlot = (map, data) => {
 
   container
     .append('h1')
+    .style('color', '#00002B')
     .text(
       '3,969 International Students Came From 107 Countries in the 2020-21 School Year',
     );
@@ -60,6 +61,7 @@ const makePlot = (map, data) => {
 
   container
     .append('a')
+    .style('color', '#00002B')
     .text("Source: UCSB Registrar's 3rd Week Registration Report")
     .attr(
       'href',
@@ -108,7 +110,7 @@ const makePlot = (map, data) => {
     .attr('fill', (d) => (d.properties.name === 'United States of America' || d.properties.val === 0
       ? 'none'
       : binColor(d.properties.val)))
-    .attr('stroke', 'black')
+    .attr('stroke', '#00002B')
     .attr('stroke-width', 0.5)
     .attr('d', path)
     .on('mouseenter', (_, d) => {
@@ -168,6 +170,7 @@ const makePlot = (map, data) => {
     .enter()
     .filter((d) => d.val > 0)
     .append('circle')
+    .attr('fill', '#00002B')
     .attr('r', 0.75)
     .attr('cx', (d, i) => {
       // console.log(d, clusters);
@@ -188,7 +191,7 @@ const makePlot = (map, data) => {
     .enter()
     .append('text')
     .attr('x', (d, i) => legendSquareSize.width * i - 1)
-    .attr('y', legendSquareSize.height + 10)
+    .attr('y', legendSquareSize.height + 17)
     .attr('alignment-baseline', 'hanging')
     .attr('fill', '#adadad')
     .text(
@@ -197,7 +200,11 @@ const makePlot = (map, data) => {
     )
     .attr('font-size', '10pt');
 
-  legendArea.append('text').attr('y', -5).text('# students by country');
+  legendArea
+    .append('text')
+    .attr('y', -5)
+    .attr('fill', '#00002B')
+    .text('# students by country');
 };
 
 export default makePlot;

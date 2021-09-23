@@ -10,7 +10,7 @@ library(tidyverse)
 ```
 
 ```{r}
-map <- tigris::states()
+#map <- tigris::states()
 states <- read.csv("states.csv")
 
 long <- states %>%
@@ -32,8 +32,14 @@ long %>%
 
 ```{r}
 states %>%
-  filter(State %in% c("Washingotn", "New York"))
+  filter(State %in% c("Washington", "New York"))
 ```
+```{r}
+states %>%
+  filter(X2018 == 0)
+ # filter(State == "South Dakota")
+```
+
 
 
 ```{r, fig.height=8}
@@ -55,7 +61,7 @@ long %>%
 
 
 ```{r, fig.width=10}
-ggplot(long %>% filter(State != "California")) +
+ggplot(long %>% filter(State != "California") %>% filter(val < 10)) +
   geom_line(aes(x = year, y = val, group=State, color=State))
 ggplot(long %>% filter(State %in% c("Washingotn", "New York", "Illinois", "New Jersey", "Texas", "Massachusetts"))) +
   geom_line(aes(x = year, y = val, group=State, color=State))
@@ -98,10 +104,14 @@ caPct
 
 0.9206696-0.9054027
 
+caPct
+
 caPct %>%
   ggplot() +
     geom_line(aes(x=year, y=pct, group=State)) +
-    geom_point(aes(x=year, y=pct))
+    geom_point(aes(x=year, y=pct)) +
+  # scale_y_continuous(lim=c(0, 1))
+  NULL
 ```
 
 ```{r}

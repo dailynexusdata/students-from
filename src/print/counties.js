@@ -4,12 +4,11 @@
  * @author alex
  *
  */
-import { select, pointer } from 'd3-selection';
+import { select } from 'd3-selection';
 import { scaleLinear } from 'd3-scale';
 import { geoPath, geoAlbersUsa } from 'd3-geo';
 import { polygonContains } from 'd3-polygon';
 import { extent } from 'd3-array';
-import { format } from 'd3-format';
 
 function distPointEdge(p, l1, l2) {
   const A = p[0] - l1[0];
@@ -163,41 +162,35 @@ const makePlot = (map) => {
    */
 
   // The class is necessary to apply styling
-  const container = select('#where-students-from-counties-map').attr(
-    'class',
-    'where-students-from',
-  );
+  const container = select('#where-students-from-counties-map')
+    .attr('class', 'where-students-from')
+    .style('width', '100%');
 
   // When the resize event is called, reset the plot
   container.selectAll('*').remove();
 
   container
     .append('h1')
+    .style('color', '#00002B')
     .text(
-      'Los Angeles County Had the Most UCSB Students out of Counties in California for the 2020-21 School Year',
+      'Los Angeles County had the most UCSB Students of Counties in California for the 2020-21 School Year',
     );
 
   const size = {
-    height: 700,
+    height: 600,
     width: Math.min(window.innerWidth - 40, 600),
   };
 
   const margin = {
-    top: 110,
+    top: 10,
     right: 10,
     bottom: 10,
-    left: 100,
+    left: 10,
   };
 
   // container.style('width', `${size.width}px`);
 
-  const hoverArea = container
-    .append('div')
-    .style('position', 'relative')
-    .style('display', 'flex')
-    .style('justify-content', 'center');
-
-  const svg = hoverArea
+  const svg = container
     .append('svg')
     .attr('height', size.height)
     .attr('width', size.width);
@@ -208,20 +201,13 @@ const makePlot = (map) => {
     .style('overflow-wrap', 'break-word')
     .style('word-break', 'break-word')
     .style('word-break', 'normal')
-    .style('line-height', 'normal')
-    .text('Source: ');
+    .text('Source: ')
+    .style('color', '#00002B');
 
   sourceContainer
     .append('span')
-    .style('word-wrap', 'normal')
-    .style('display', 'inline')
-    .style('word-break', 'break-word')
-    .style('overflow-wrap', 'break-word')
+    .style('display', 'inline-block')
     .append('a')
-    .style('word-wrap', 'normal')
-    .style('display', 'inline')
-    .style('word-break', 'break-word')
-    .style('overflow-wrap', 'break-word')
     .text("UCSB Registrar's 3rd Week Registration Report")
     .attr(
       'href',
@@ -248,20 +234,11 @@ const makePlot = (map) => {
   /*
      Create Scales:
    */
-  const proj = geoAlbersUsa().fitSize(
-    [
-      size.width - margin.left - margin.right,
-      size.height - margin.bottom - margin.top,
-    ],
-    map,
-  );
+  const proj = geoAlbersUsa().fitSize([size.width - 10, size.height], map);
 
   const projection = geoAlbersUsa()
     .scale(proj.scale())
-    .translate([
-      proj.translate()[0] + margin.right / 2 + margin.left,
-      proj.translate()[1] + margin.top,
-    ]);
+    .translate([proj.translate()[0] + 5, proj.translate()[1]]);
 
   const path = geoPath().projection(projection);
 
@@ -269,56 +246,22 @@ const makePlot = (map) => {
      Start Plot:
    */
 
-  const counties = svg
-    .append('g')
-    .selectAll('path')
-    .data(map.features)
-    .enter()
-    .append('g');
+  const counties = svg.selectAll('path').data(map.features).join('g');
 
   counties
     .append('path')
     .attr('d', path)
     // .attr('fill', '#d3d3d322')
     .attr('fill', 'none')
-    .attr('stroke', 'black')
+    .attr('stroke', '#00002B')
     .attr('stroke-width', 0.5);
 
   const radius = scaleLinear()
     .domain(extent(map.features, (d) => d.properties.pct))
     .range([0.6, 3.5]);
 
-  // console.log(
-  //   JSON.stringify(
-  //     map.features.map((d) => {
-  //       const poly =
-  //         d.geometry.coordinates[0][0].length === 2
-  //           ? d.geometry.coordinates[0]
-  //           : d.geometry.coordinates[0][0];
-
-  //       const output = makeDots(
-  //         poly.map(projection),
-  //         Math.floor(d.properties.val / 30),
-  //         {
-  //           distance: 3,
-  //           edgeDistance: 1.3,
-  //         },
-  //       );
-
-  //       return {
-  //         ...d,
-  //       };
-  //     }),
-  //   ),
-  // );
-
   setTimeout(() => {
-    const circles = svg.append('g');
-
-    circles
-      .selectAll('circleGroups')
-      .data(map.features.filter((d) => d.properties.val >= 30))
-      .enter()
+    counties
       .append('g')
       .selectAll('circle')
       .data((d, i) => {
@@ -349,46 +292,36 @@ const makePlot = (map) => {
       .attr('fill', '#08519C')
       .attr('stroke', 'white')
       .attr('stroke-width', 0.1);
-
-    // circles;
-    circles.lower();
   }, 0);
 
   /**
    * SB County label
    */
   const labels = svg.append('g');
-
-  const sbProj = projection([-120.4492794379486, 34.4470229495366]);
-
-  labels.attr('transform', `translate(${sbProj[0] - 200}, ${sbProj[1] - 445})`);
-
-  // 34.44702294953664, -120.4492794379486
-
-  labels
+  svg
     .append('text')
     .text('Santa Barbara County')
     .attr('fill', '#08519C')
     .attr('font-weight', 'bold')
     .attr('font-size', '10pt')
-    .attr('x', 50)
+    .attr('x', 25)
     .attr('y', 410);
 
-  labels
+  svg
     .append('text')
     .text('had the most students')
     .attr('fill', '#08519C')
     .attr('font-weight', 'bold')
     .attr('font-size', '10pt')
-    .attr('x', 50)
+    .attr('x', 25)
     .attr('y', 422);
-  labels
+  svg
     .append('text')
-    .text('per county population.')
+    .text('per county population')
     .attr('fill', '#08519C')
     .attr('font-weight', 'bold')
     .attr('font-size', '10pt')
-    .attr('x', 50)
+    .attr('x', 25)
     .attr('y', 434);
 
   labels
@@ -416,20 +349,7 @@ const makePlot = (map) => {
    * LA Label
    */
 
-  const labelsLa = svg.append('g');
-
-  const laProj = projection([-118.41386577742108, 33.85126781586691]);
-
-  labelsLa.attr(
-    'transform',
-    `translate(${laProj[0] - 285}, ${laProj[1] - 505})`,
-  );
-
-  // 34.44702294953664, -120.4492794379486
-
-  console.log(laProj);
-
-  labelsLa
+  labels
     .append('path')
     .attr('d', 'M 272 508 Q 255 530, 230 540')
     .attr('fill', 'none')
@@ -437,7 +357,7 @@ const makePlot = (map) => {
     .attr('stroke-width', 2)
     .attr('marker-start', 'url(#where-students-from-county-triangle2)');
 
-  labelsLa
+  svg
     .append('text')
     .text('Los Angeles County')
     .attr('fill', '#08519C')
@@ -446,7 +366,7 @@ const makePlot = (map) => {
     .attr('x', 80)
     .attr('y', 535);
 
-  labelsLa
+  svg
     .append('text')
     .text('had the most students')
     .attr('fill', '#08519C')
@@ -454,7 +374,7 @@ const makePlot = (map) => {
     .attr('font-size', '10pt')
     .attr('x', 80)
     .attr('y', 547);
-  labelsLa
+  svg
     .append('text')
     .text('in total.')
     .attr('fill', '#08519C')
@@ -467,9 +387,7 @@ const makePlot = (map) => {
    * legend
    */
 
-  const boxLegend = svg
-    .append('g')
-    .attr('transform', `translate(${size.width / 5}, 5)`);
+  const boxLegend = svg.append('g').attr('transform', 'translate(380, 160)');
 
   boxLegend
     .append('rect')
@@ -477,7 +395,7 @@ const makePlot = (map) => {
     .attr('y', 0)
     .attr('height', 20)
     .attr('fill', 'none')
-    .attr('stroke', 'black')
+    .attr('stroke', '#00002B')
     .attr('width', 20);
 
   boxLegend
@@ -489,20 +407,19 @@ const makePlot = (map) => {
 
   boxLegend
     .append('text')
+    .attr('fill', '#00002B')
     .text('Each circle represents')
     .attr('x', 30)
     .attr('y', 12);
 
-  boxLegend.append('text').text('30 students.').attr('x', 30).attr('y', 30);
+  boxLegend
+    .append('text')
+    .text('30 students.')
+    .attr('fill', '#00002B')
+    .attr('x', 30)
+    .attr('y', 30);
 
-  const radLegend = svg
-    .append('g')
-    .attr(
-      'transform',
-      `translate(${(size.width / 5) * (size.width + 40 < 527 ? 1 : 3)}, ${
-        size.width > 487 ? 60 : 105
-      })`,
-    );
+  const radLegend = svg.append('g').attr('transform', 'translate(380, 270)');
 
   radLegend
     .selectAll('circle')
@@ -519,80 +436,29 @@ const makePlot = (map) => {
     .data([0.001, 0.002])
     .enter()
     .append('text')
+    .attr('fill', '#00002B')
     .text((d, i) => `${d * 100}%${i === 0 ? ' of county population' : ''}`)
     .attr('alignment-baseline', 'middle')
     .attr('x', 20)
     .attr('y', (_, i) => i * 20);
 
-  radLegend.append('text').attr('y', -44).text('Circle size shows the');
+  radLegend
+    .append('text')
+    .attr('fill', '#00002B')
+    .attr('y', -44)
+    .text('Circle size shows the');
 
-  radLegend.append('text').attr('y', -30).text('total # of students');
+  radLegend
+    .append('text')
+    .attr('fill', '#00002B')
+    .attr('y', -30)
+    .text('total # of students');
 
-  radLegend.append('text').attr('y', -16).text('per county population.');
-
-  /**
-   * hover over:
-   */
-
-  const tooltip = hoverArea
-    .append('div')
-    .style('display', 'none')
-    .style('pointer-events', 'none')
-    .style('position', 'absolute')
-    .style('background-color', 'white')
-    .style('padding', '10px')
-    .style('border-radius', '10px')
-    .style('border', '1px solid #d3d3d3');
-
-  svg
-    .append('g')
-    .selectAll('overLayPath')
-    .data(map.features)
-    .enter()
-    .append('path')
-    .attr('d', path)
-    .attr('id', (d) => `laby-where-students-from-county-${d.properties.name}`)
-    .attr('fill-opacity', 0)
-    // .attr('fill', 'black')
-    .on('mouseenter', (_, d) => {
-      tooltip.style('display', 'block');
-      tooltip.selectAll('*').remove();
-      tooltip.append('h3').text(`${d.properties.name} County`);
-      tooltip
-        .append('hr')
-        .style('margin', '3px 0')
-        .style('border', 'none')
-        .style('border-top', '1px solid #d3d3d3');
-      tooltip
-        .append('p')
-        .text(`# Students in 2020-21: ${format(',')(d.properties.val)}`);
-      // tooltip.append('p').text(`Rank: ${d.properties.rank}`);
-    })
-    .on('mousemove', (event, d) => {
-      select(
-        `#laby-where-students-from-county-${d.properties.name.replace(
-          / /g,
-          '-',
-        )}`,
-      ).attr('stroke-width', 1.5);
-
-      const width = 200;
-      const [mouseX, mouseY] = pointer(event);
-
-      tooltip
-        .style('width', `${width}px`)
-        .style('left', `${Math.min(mouseX, size.width - width - 30)}px`)
-        .style('top', `${mouseY + 10}px`);
-    })
-    .on('mouseleave', (event, d) => {
-      select(
-        `#laby-where-students-from-county-${d.properties.name.replace(
-          / /g,
-          '-',
-        )}`,
-      ).attr('stroke-width', 0.75);
-      tooltip.style('display', 'none');
-    });
+  radLegend
+    .append('text')
+    .attr('fill', '#00002B')
+    .attr('y', -16)
+    .text('per county population.');
 };
 
 export default makePlot;

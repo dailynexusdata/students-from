@@ -1,7 +1,7 @@
 import { max, extent } from 'd3-array';
 import { scaleLinear } from 'd3-scale';
 import { line, area } from 'd3-shape';
-import { axisBottom } from 'd3-axis';
+import { axisBottom, axisLeft } from 'd3-axis';
 import 'd3-transition';
 
 const makePlot = (container, data) => {
@@ -11,7 +11,7 @@ const makePlot = (container, data) => {
   };
 
   const margin = {
-    left: 10,
+    left: 40,
     right: 10,
     top: 10,
     bottom: 25,
@@ -93,6 +93,14 @@ const makePlot = (container, data) => {
     .style('font-size', '16px')
     .attr('color', '#adadad')
     .call(axisBottom(x).tickFormat((d) => (d === 2002 || d === 2020 ? d : '')));
+
+  svg
+    .append('g')
+    .attr('transform', `translate(${margin.left}, 0)`)
+    .style('font-family', 'Helvetica Neue,Helvetica,Arial,sans-serif')
+    .style('font-size', '16px')
+    .attr('color', '#adadad')
+    .call(axisLeft(y).ticks(2));
 };
 
 export default makePlot;

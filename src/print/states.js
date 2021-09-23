@@ -11,7 +11,6 @@ import { extent } from 'd3-array';
 import { format } from 'd3-format';
 
 import { arc } from 'd3-shape';
-import makeStateTimeseries from './states_ts';
 
 /**
  * @param {*} map - states geojson
@@ -40,12 +39,12 @@ const makePlot = (map) => {
     );
 
   const size = {
-    height: Math.min(570, window.innerWidth + 30),
+    height: 570,
     width: Math.min(800, window.innerWidth - 40),
   };
 
   const margin = {
-    top: 25,
+    top: 10,
     right: 10,
     bottom: 10,
     left: 10,
@@ -68,11 +67,6 @@ const makePlot = (map) => {
       'href',
       'https://bap.ucsb.edu/institutional-research/registration-reports',
     );
-
-  container
-    .append('p')
-    .text('Chart: Alex Rudolph & Christy Yu')
-    .style('font-style', 'italic');
 
   /*
     Create Scales:
@@ -100,7 +94,7 @@ const makePlot = (map) => {
     .append('path')
     .attr('d', path)
     .attr('fill', 'none')
-    .attr('stroke', 'black')
+    .attr('stroke', '#00002B')
     .attr('stroke-width', 0.75)
     .attr(
       'id',
@@ -120,7 +114,7 @@ const makePlot = (map) => {
         (d) => d.properties.val,
       ),
     )
-    .range([3, window.innerWidth > 500 ? 22 : 16]);
+    .range([3, 22]);
 
   // console.log(radius.domain(), radius.range());
 
@@ -176,7 +170,7 @@ const makePlot = (map) => {
       }
       else if (d.properties.NAME === 'Washington') {
         yOffset = 150;
-        xOffset = 80;
+        xOffset = 100;
       }
       else if (d.properties.NAME === 'Oregon') {
         yOffset = 150;
@@ -193,63 +187,6 @@ const makePlot = (map) => {
   /**
    * Tooltip:
    */
-  const tooltip = hoverArea
-    .append('div')
-    .style('display', 'none')
-    .style('pointer-events', 'none')
-    .style('position', 'absolute')
-    .style('background-color', 'white')
-    .style('padding', '10px')
-    .style('border-radius', '10px')
-    .style('border', '1px solid #d3d3d3');
-
-  const overlay = states
-    .append('path')
-    .attr('d', path)
-    .attr('fill-opacity', 0)
-    .on('mouseenter', (_, d) => {
-      tooltip.style('display', 'block');
-      tooltip.selectAll('*').remove();
-      tooltip.append('h3').text(d.properties.NAME);
-      tooltip
-        .append('hr')
-        .style('margin', '3px 0')
-        .style('border', 'none')
-        .style('border-top', '1px solid #d3d3d3');
-      tooltip
-        .append('p')
-        .text(`# Students in 2020-21: ${format(',')(d.properties.val)}`);
-      // tooltip.append('p').text(`Rank: ${d.properties.rank}`);
-
-      const ts = tooltip.append('div');
-
-      makeStateTimeseries(ts, d.properties.values);
-    })
-    .on('mousemove', (event, d) => {
-      select(
-        `#laby-where-students-from-state-${d.properties.NAME.replace(
-          / /g,
-          '-',
-        )}`,
-      ).attr('stroke-width', 1.5);
-
-      const width = 200;
-      const [mouseX, mouseY] = pointer(event);
-
-      tooltip
-        .style('width', `${width}px`)
-        .style('left', `${Math.min(mouseX, size.width - width - 30)}px`)
-        .style('top', `${mouseY + 10}px`);
-    })
-    .on('mouseleave', (event, d) => {
-      select(
-        `#laby-where-students-from-state-${d.properties.NAME.replace(
-          / /g,
-          '-',
-        )}`,
-      ).attr('stroke-width', 0.75);
-      tooltip.style('display', 'none');
-    });
 
   const cSizes = [10, 100, 200];
 
@@ -257,9 +194,7 @@ const makePlot = (map) => {
     .append('g')
     .attr(
       'transform',
-      `translate(${
-        size.width >= 800 ? size.width / 2 : (size.width / 1600) * size.width
-      }, ${30})`,
+      `translate(${(size.width * 3) / 5 - 50}, ${margin.top + 16})`,
     );
   // .attr(
   //   'transform',
@@ -300,44 +235,43 @@ const makePlot = (map) => {
     .data(cSizes)
     .enter()
     .append('text')
+    .attr('fill', '#00002B')
     .attr('alignment-baseline', 'middle')
     .attr('x', radius(cSizes[cSizes.length - 1]) * 2 + 20)
     .attr('y', (d) => 2 * radius(cSizes[cSizes.length - 1]) - 2 * radius(d))
     .text((d, i) => d + (i === cSizes.length - 1 ? ' students' : ''));
 
-  legendArea.append('text').text('# students 2020-21').attr('y', -14);
+  legendArea
+    .append('text')
+    .attr('fill', '#00002B')
+    .text('# students 2020-21')
+    .attr('y', -14);
 
-  const arcLegendArea = svg.append('g');
+  const arcLegendArea = svg
+    .append('g')
+    .attr('transform', `translate(${(size.width * 3) / 5 + 140}, -1)`);
 
-  if (size.width >= 730) {
-    arcLegendArea.attr(
-      'transform',
-      `translate(${(size.width * 3) / 5 + 140}, -1)`,
-    );
-  }
-  else if (size.width < 450) {
-    arcLegendArea.attr(
-      'transform',
-      `translate(${(size.width / 1600) * size.width}, ${
-        size.height - margin.bottom - 80
-      })`,
-    );
-  }
-  else {
-    arcLegendArea.attr(
-      'transform',
-      `translate(${(size.width / 1600) * size.width + 170}, ${-1})`,
-    );
-  }
   arcLegendArea
     .append('path')
     .attr('fill', 'none')
     .attr('stroke', '#EDC949')
     .attr('stroke-width', 2)
     .attr('d', 'M 40 12 Q 60 0, 80 12');
-  arcLegendArea.append('text').attr('y', 32).text('Indicates a state');
-  arcLegendArea.append('text').attr('y', 48).text('with top 7 number');
-  arcLegendArea.append('text').attr('y', 64).text('of students.');
+  arcLegendArea
+    .append('text')
+    .attr('fill', '#00002B')
+    .attr('y', 32)
+    .text('Indicates a state');
+  arcLegendArea
+    .append('text')
+    .attr('fill', '#00002B')
+    .attr('y', 48)
+    .text('with top 7 number');
+  arcLegendArea
+    .append('text')
+    .attr('fill', '#00002B')
+    .attr('y', 64)
+    .text('of students.');
 };
 
 export default makePlot;

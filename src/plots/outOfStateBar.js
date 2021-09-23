@@ -9,6 +9,245 @@ import { scaleBand, scaleRadial } from 'd3-scale';
 import { max } from 'd3-array';
 import { arc } from 'd3-shape';
 
+const stateNames = [
+  {
+    name: 'Alabama',
+    abbreviation: 'AL',
+  },
+  {
+    name: 'Alaska',
+    abbreviation: 'AK',
+  },
+  {
+    name: 'American Samoa',
+    abbreviation: 'AS',
+  },
+  {
+    name: 'Arizona',
+    abbreviation: 'AZ',
+  },
+  {
+    name: 'Arkansas',
+    abbreviation: 'AR',
+  },
+  {
+    name: 'California',
+    abbreviation: 'CA',
+  },
+  {
+    name: 'Colorado',
+    abbreviation: 'CO',
+  },
+  {
+    name: 'Connecticut',
+    abbreviation: 'CT',
+  },
+  {
+    name: 'Delaware',
+    abbreviation: 'DE',
+  },
+  {
+    name: 'District of Columbia',
+    abbreviation: 'DC',
+  },
+  {
+    name: 'Federated States Of Micronesia',
+    abbreviation: 'FM',
+  },
+  {
+    name: 'Florida',
+    abbreviation: 'FL',
+  },
+  {
+    name: 'Georgia',
+    abbreviation: 'GA',
+  },
+  {
+    name: 'Guam',
+    abbreviation: 'GU',
+  },
+  {
+    name: 'Hawaii',
+    abbreviation: 'HI',
+  },
+  {
+    name: 'Idaho',
+    abbreviation: 'ID',
+  },
+  {
+    name: 'Illinois',
+    abbreviation: 'IL',
+  },
+  {
+    name: 'Indiana',
+    abbreviation: 'IN',
+  },
+  {
+    name: 'Iowa',
+    abbreviation: 'IA',
+  },
+  {
+    name: 'Kansas',
+    abbreviation: 'KS',
+  },
+  {
+    name: 'Kentucky',
+    abbreviation: 'KY',
+  },
+  {
+    name: 'Louisiana',
+    abbreviation: 'LA',
+  },
+  {
+    name: 'Maine',
+    abbreviation: 'ME',
+  },
+  {
+    name: 'Marshall Islands',
+    abbreviation: 'MH',
+  },
+  {
+    name: 'Maryland',
+    abbreviation: 'MD',
+  },
+  {
+    name: 'Massachusetts',
+    abbreviation: 'MA',
+  },
+  {
+    name: 'Michigan',
+    abbreviation: 'MI',
+  },
+  {
+    name: 'Minnesota',
+    abbreviation: 'MN',
+  },
+  {
+    name: 'Mississippi',
+    abbreviation: 'MS',
+  },
+  {
+    name: 'Missouri',
+    abbreviation: 'MO',
+  },
+  {
+    name: 'Montana',
+    abbreviation: 'MT',
+  },
+  {
+    name: 'Nebraska',
+    abbreviation: 'NE',
+  },
+  {
+    name: 'Nevada',
+    abbreviation: 'NV',
+  },
+  {
+    name: 'New Hampshire',
+    abbreviation: 'NH',
+  },
+  {
+    name: 'New Jersey',
+    abbreviation: 'NJ',
+  },
+  {
+    name: 'New Mexico',
+    abbreviation: 'NM',
+  },
+  {
+    name: 'New York',
+    abbreviation: 'NY',
+  },
+  {
+    name: 'North Carolina',
+    abbreviation: 'NC',
+  },
+  {
+    name: 'North Dakota',
+    abbreviation: 'ND',
+  },
+  {
+    name: 'Northern Mariana Islands',
+    abbreviation: 'MP',
+  },
+  {
+    name: 'Ohio',
+    abbreviation: 'OH',
+  },
+  {
+    name: 'Oklahoma',
+    abbreviation: 'OK',
+  },
+  {
+    name: 'Oregon',
+    abbreviation: 'OR',
+  },
+  {
+    name: 'Palau',
+    abbreviation: 'PW',
+  },
+  {
+    name: 'Pennsylvania',
+    abbreviation: 'PA',
+  },
+  {
+    name: 'Puerto Rico',
+    abbreviation: 'PR',
+  },
+  {
+    name: 'Rhode Island',
+    abbreviation: 'RI',
+  },
+  {
+    name: 'South Carolina',
+    abbreviation: 'SC',
+  },
+  {
+    name: 'South Dakota',
+    abbreviation: 'SD',
+  },
+  {
+    name: 'Tennessee',
+    abbreviation: 'TN',
+  },
+  {
+    name: 'Texas',
+    abbreviation: 'TX',
+  },
+  {
+    name: 'Utah',
+    abbreviation: 'UT',
+  },
+  {
+    name: 'Vermont',
+    abbreviation: 'VT',
+  },
+  {
+    name: 'Virgin Islands',
+    abbreviation: 'VI',
+  },
+  {
+    name: 'Virginia',
+    abbreviation: 'VA',
+  },
+  {
+    name: 'Washington',
+    abbreviation: 'WA',
+  },
+  {
+    name: 'West Virginia',
+    abbreviation: 'WV',
+  },
+  {
+    name: 'Wisconsin',
+    abbreviation: 'WI',
+  },
+  {
+    name: 'Wyoming',
+    abbreviation: 'WY',
+  },
+];
+
 /**
  *
  * @author alex
@@ -42,8 +281,8 @@ const makePlot = (data) => {
     left: 10,
   };
 
-  const innerRadius = 100;
-  const outerRadius = size.width / 2;
+  const innerRadius = 80;
+  const outerRadius = size.width * 0.42;
 
   const svg = container
     .append('svg')
@@ -80,6 +319,7 @@ const makePlot = (data) => {
     .enter()
     .append('path')
     .attr('fill', '#2171B5')
+    .attr('fill-opacity', 0.5)
     .attr(
       'd',
       arc()
@@ -90,8 +330,34 @@ const makePlot = (data) => {
         .padAngle(0.01)
         .padRadius(innerRadius),
     )
-    .on('mouseenter', (event, d) => {
-      console.log(d.properties.val);
+    .on('mouseenter', function (event, dat) {
+      console.log(dat.properties);
+      select(this)
+        .attr(
+          'd',
+          arc()
+            .innerRadius(innerRadius - 5)
+            .outerRadius((d) => y(d.properties.val) + 5)
+            .startAngle((d) => x(d.properties.NAME))
+            .endAngle((d) => x(d.properties.NAME) + x.bandwidth())
+            .padAngle(0.01)
+            .padRadius(innerRadius - 5),
+        )
+        .attr('fill-opacity', 1);
+    })
+    .on('mouseleave', function (event, dat) {
+      select(this)
+        .attr(
+          'd',
+          arc()
+            .innerRadius(innerRadius)
+            .outerRadius((d) => y(d.properties.val))
+            .startAngle((d) => x(d.properties.NAME))
+            .endAngle((d) => x(d.properties.NAME) + x.bandwidth())
+            .padAngle(0.01)
+            .padRadius(innerRadius - 5),
+        )
+        .attr('fill-opacity', 0.5);
     });
 
   svg
@@ -110,7 +376,9 @@ const makePlot = (data) => {
       }) translate(${y(d.properties.val) + 5}, 0)`,
     )
     .append('text')
-    .text((d) => d.properties.NAME)
+    .text(
+      (d) => stateNames.find((n) => n.name === d.properties.NAME).abbreviation,
+    )
     .attr('transform', (d) => ((x(d.properties.NAME) + x.bandwidth() / 2 + Math.PI) % (2 * Math.PI)
       < Math.PI
       ? 'rotate(180)'
